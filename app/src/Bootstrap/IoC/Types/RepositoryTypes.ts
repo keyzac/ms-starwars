@@ -1,3 +1,3 @@
 export const RepositoryTypes = {
-  UserRepository: Symbol.for('UserRepository'),
+  PeopleRepository: Symbol.for('PeopleRepository'),
 };

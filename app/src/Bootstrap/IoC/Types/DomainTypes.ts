@@ -1,3 +1,3 @@
 export const DomainTypes = {
-  UserDomain: Symbol.for('UserDomain')
+  PeopleDomain: Symbol.for('PeopleDomain')
 };

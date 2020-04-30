@@ -33,7 +33,7 @@ export class ResultDto {
     this._code = value;
   }
 
-  get body() {
+  public get body() {
     return {
       'code': this.code,
       'message': this.message,

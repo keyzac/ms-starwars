@@ -25,10 +25,9 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
 
 functions:
-  home:
-#    handler: src/Web/Handler/HomeHandler.handler
-    handler: src/index.handler
+  people:
+    handler: src/Web/StarWars.handler
     events:
       - http:
           method: get
-          path: /
+          path: people
