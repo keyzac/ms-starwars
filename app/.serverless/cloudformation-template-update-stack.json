@@ -56,10 +56,10 @@
         }
       }
     },
-    "HomeLogGroup": {
+    "PeopleLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/starwars-ms-dev-home"
+        "LogGroupName": "/aws/lambda/starwars-ms-dev-people"
       }
     },
     "IamRoleLambdaExecution": {
@@ -117,6 +117,26 @@
                       "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/starwars-ms-dev*:*:*"
                     }
                   ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:DescribeTable",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "PeopleDynamoDBTable",
+                        "Arn"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -137,17 +157,17 @@
         }
       }
     },
-    "HomeLambdaFunction": {
+    "PeopleLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/starwars-ms/dev/1588219216747-2020-04-30T04:00:16.747Z/starwars-ms.zip"
+          "S3Key": "serverless/starwars-ms/dev/1588231006194-2020-04-30T07:16:46.194Z/starwars-ms.zip"
         },
-        "FunctionName": "starwars-ms-dev-home",
-        "Handler": "src/index.handler",
+        "FunctionName": "starwars-ms-dev-people",
+        "Handler": "src/Web/StarWars.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -164,18 +184,18 @@
         }
       },
       "DependsOn": [
-        "HomeLogGroup",
+        "PeopleLogGroup",
         "IamRoleLambdaExecution"
       ]
     },
-    "HomeLambdaVersionYdPUr3eLb5kQOQeAviHMUftynd4xQ4BSnUU8hXw7o": {
+    "PeopleLambdaVersionUzjQ48fNnbfzQEO9yeJjrcBCFVRuhmWcTypMBjwpTw": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "HomeLambdaFunction"
+          "Ref": "PeopleLambdaFunction"
         },
-        "CodeSha256": "3fhnJxON3fjhGrfIRvkq4DBi1H3kLyOfzOGm2W8Osq0="
+        "CodeSha256": "rp5LOU0useCM7wJqZXhWHhxAi7D6lCUf686mf2QRriA="
       }
     },
     "ApiGatewayRestApi": {
@@ -191,16 +211,28 @@
         "MinimumCompressionSize": 1024
       }
     },
-    "ApiGatewayMethodGet": {
+    "ApiGatewayResourcePeople": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "people",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayMethodPeopleGet": {
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
         "HttpMethod": "GET",
         "RequestParameters": {},
         "ResourceId": {
-          "Fn::GetAtt": [
-            "ApiGatewayRestApi",
-            "RootResourceId"
-          ]
+          "Ref": "ApiGatewayResourcePeople"
         },
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
@@ -225,7 +257,7 @@
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "HomeLambdaFunction",
+                    "PeopleLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -237,7 +269,7 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayDeployment1588219207235": {
+    "ApiGatewayDeployment1588230995799": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -246,15 +278,15 @@
         "StageName": "dev"
       },
       "DependsOn": [
-        "ApiGatewayMethodGet"
+        "ApiGatewayMethodPeopleGet"
       ]
     },
-    "HomeLambdaPermissionApiGateway": {
+    "PeopleLambdaPermissionApiGateway": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "HomeLambdaFunction",
+            "PeopleLambdaFunction",
             "Arn"
           ]
         },
@@ -285,6 +317,28 @@
           ]
         }
       }
+    },
+    "PeopleDynamoDBTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": "people-table-dev",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        }
+      }
     }
   },
   "Outputs": {
@@ -293,10 +347,10 @@
         "Ref": "ServerlessDeploymentBucket"
       }
     },
-    "HomeLambdaFunctionQualifiedArn": {
+    "PeopleLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "HomeLambdaVersionYdPUr3eLb5kQOQeAviHMUftynd4xQ4BSnUU8hXw7o"
+        "Ref": "PeopleLambdaVersionUzjQ48fNnbfzQEO9yeJjrcBCFVRuhmWcTypMBjwpTw"
       }
     },
     "ServiceEndpoint": {

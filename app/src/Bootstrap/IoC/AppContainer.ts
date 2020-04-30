@@ -5,7 +5,9 @@ import { ValidationRequest } from '../../Users/Infrastructure/Validation/Validat
 import { PeopleService } from '../../Users/Application/Services/PeopleService';
 import { PeopleDomain } from '../../Users/Domain/Services/PeopleDomain';
 import { StarWarsRepositoryInterface } from '../../Users/Domain/Repository/StarWarsRepositoryInterface';
+import { DynamoRepositoryInterface } from '../../Users/Domain/Repository/DynamoRepositoryInterface';
 import { StarWarsRepository } from '../../Users/Infrastructure/Repository/StarWarsRepository';
+import { DynamoRepository } from '../../Users/Infrastructure/Repository/DynamoRepository';
 
 const container = new Container();
 const commonConfig = new ResourceManager();
@@ -35,7 +37,7 @@ container
  * Domain Services
  */
 container
-  .bind<PeopleDomain>(TYPES.Domain.UserDomain)
+  .bind<PeopleDomain>(TYPES.Domain.PeopleDomain)
   .to(PeopleDomain)
   .inSingletonScope();
 
@@ -43,8 +45,12 @@ container
  * Repositories
  */
 container
-  .bind<StarWarsRepositoryInterface>(TYPES.Repositories.UserRepository)
+  .bind<StarWarsRepositoryInterface>(TYPES.Repositories.PeopleRepository)
   .to(StarWarsRepository)
+  .inSingletonScope();
+container
+  .bind<DynamoRepositoryInterface>(TYPES.Repositories.PeopleRepository)
+  .to(DynamoRepository)
   .inSingletonScope();
 
 export { container };

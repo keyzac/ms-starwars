@@ -5,6 +5,7 @@ service:
 #org: your-org-name
 
 custom:
+  tableName: 'people-table-${self:provider.stage}'
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
@@ -21,13 +22,47 @@ provider:
   region: us-east-1
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["PeopleDynamoDBTable", "Arn" ] }
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
 
 functions:
-  people:
+  get:
     handler: src/Web/StarWars.handler
     events:
       - http:
           method: get
+          path: people/{id}
+  create:
+    handler: src/Web/Dynamo.handler
+    events:
+      - http:
+          method: post
           path: people
+
+resources:
+  Resources:
+    PeopleDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

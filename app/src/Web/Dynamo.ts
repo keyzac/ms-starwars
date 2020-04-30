@@ -10,10 +10,8 @@ const app = new Koa();
 const peopleService = new PeopleService(new ValidationRequest(), new PeopleDomain());
 
 app.use(async function (ctx, next) {
-  const path = '/people/';
-  const id = ctx.path.replace(path, '');
   const response = await peopleService
-    .get(id)
+    .get(ctx.request.body)
     .catch(e => (ctx.exception = e));
   ctx.type = 'json';
   ctx.body = response.body;

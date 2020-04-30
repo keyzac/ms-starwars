@@ -10,9 +10,9 @@ import { PeopleDto } from '../../Application/Dto/Response/PeopleDto';
 export class StarWarsRepository implements StarWarsRepositoryInterface {
   private url: string = 'https://swapi.py4e.com/api/';
 
-  public async getPeople(): Promise<PeopleDto> {
+  public async getPeople(id: number): Promise<PeopleDto> {
     try {
-      return axios.get(this.url + 'people/1/').then(resp => {
+      return axios.get(this.url + 'people/' + id).then(resp => {
         return resp.data;
       });
     } catch (error) {
